@@ -296,5 +296,5 @@ func main() {
 	http.HandleFunc("/drm", DRMHandler)
 
 	fmt.Println("Server started at port 80:", time.Now().Format("2006-01-02 15:04:05"))
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":4000", nil)
 }
