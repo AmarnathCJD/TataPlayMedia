@@ -1,3 +1,15 @@
+package handler
+
+import (
+	"io"
+	"net/http"
+)
+
+func DummyHandle(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "Hello :) \n")
+}
+
+var ChannelList = `
 [
   {
     "name": "Somnath Temple",
@@ -72,7 +84,7 @@
     "genre": "Entertainment"
   },
   {
-    "name": "&TV",
+    "name": "\u0026TV",
     "link": "https://rogstream.fun//hls/tata/play.php?id=578",
     "image": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-12129-j9p7kluo-v2/imageContent-12129-j9p7kluo-m3.png",
     "genre": "Entertainment"
@@ -84,7 +96,7 @@
     "genre": "Entertainment"
   },
   {
-    "name": "&tv HD",
+    "name": "\u0026tv HD",
     "link": "https://rogstream.fun//hls/tata/play.php?id=40",
     "image": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-117-j5fl7440-v1/imageContent-117-j5fl7440-m1.png",
     "genre": "Entertainment"
@@ -318,13 +330,13 @@
     "genre": "Movies"
   },
   {
-    "name": "&pictures HD",
+    "name": "\u0026pictures HD",
     "link": "https://rogstream.fun//hls/tata/play.php?id=267",
     "image": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11173-j9hth720-v1/imageContent-11173-j9hth720-m1.png",
     "genre": "Movies"
   },
   {
-    "name": "&pictures",
+    "name": "\u0026pictures",
     "link": "https://rogstream.fun//hls/tata/play.php?id=148",
     "image": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-499-j5jydp7s-v1/imageContent-499-j5jydp7s-m1.png",
     "genre": "Movies"
@@ -3486,3 +3498,4 @@
     "genre": "Knowledge"
   }
 ]
+`

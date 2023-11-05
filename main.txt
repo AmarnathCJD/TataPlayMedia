@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -83,6 +84,47 @@ func (t *TV) GetChannel(id string) (*Channel, error) {
 
 func (c *Channel) GetID() string {
 	return strings.Split(c.URL, "id=")[1]
+}
+
+func (c *Channel) GetDRMWithoutEnc() (*DRM, error) {
+	var drm DRM
+	if c.URL == "" {
+		return nil, fmt.Errorf("URL is empty")
+	}
+
+	req, err := http.NewRequest("GET", c.URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
+	req.Header.Set("Accept", "*/*")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.5")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	drm.MPD = extractValue(string(body), `file: "`, `"`)
+	drm.KeyID = extractValue(string(body), `"keyId":"`, `"`)
+	drm.Key = extractValue(string(body), `key":"`, `"`)
+	drm.Curr = extractValue(string(body), `program-name">`, `<`)
+	host, err := url.Parse(drm.MPD)
+	if err != nil {
+		return nil, err
+	}
+
+	drm.Host = host.Host
+	drm.Name = c.Name
+	drm.Image = c.Image
+
+	return &drm, nil
 }
 
 func (c *Channel) GetDRM() (*DRM, error) {
@@ -267,7 +309,7 @@ func DRMHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	drm, err := channel.GetDRM()
+	drm, err := channel.GetDRMWithoutEnc()
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
@@ -292,6 +334,13 @@ func init() {
 }
 
 func main() {
+
+	b, err := json.Marshal(MainTV.Channels)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ioutil.WriteFile("data1.json", b, 0644)
 	http.HandleFunc("/search", SearchReqHandler)
 	http.HandleFunc("/drm", DRMHandler)
 
