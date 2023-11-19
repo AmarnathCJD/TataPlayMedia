@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -83,11 +84,13 @@ type TV struct {
 }
 
 type Channel struct {
-	Name  string `json:"name,omitempty"`
-	URL   string `json:"link,omitempty"`
-	Image string `json:"image,omitempty"`
-	Genre string `json:"genre,omitempty"`
-	Id    string `json:"id,omitempty"`
+	Name   string `json:"name,omitempty"`
+	URL    string `json:"link,omitempty"`
+	Image  string `json:"image,omitempty"`
+	Genre  string `json:"genre,omitempty"`
+	Id     string `json:"id,omitempty"`
+	Mhd    bool   `json:"mhd,omitempty"`
+	Header string `json:"header,omitempty"`
 }
 
 var MainTV = &TV{}
@@ -141,6 +144,52 @@ func (c *Channel) GetDRMWithoutEnc() (*DRM, error) {
 	var drm DRM
 	if c.URL == "" {
 		return nil, fmt.Errorf("URL is empty")
+	}
+
+	if c.Mhd {
+		req, err := http.NewRequest("GET", c.URL, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
+		req.Header.Set("Referer", c.Header)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		mpdRe := regexp.MustCompile(`source:\s*'([^']+)`)
+		clearkeyRe := regexp.MustCompile(`'([0-9a-f]+)':\s*'([0-9a-f]+)'`)
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		mpd := mpdRe.FindSubmatch(body)
+		if len(mpd) < 2 {
+			return nil, fmt.Errorf("mpd not found")
+		}
+
+		drm.MPD = string(mpd[1])
+		clearKey := clearkeyRe.FindSubmatch(body)
+		if len(clearKey) < 3 {
+			return &drm, nil
+		}
+
+		drm.KeyID = string(clearKey[1])
+		drm.Key = string(clearKey[2])
+
+		host, err := url.Parse(drm.MPD)
+		if err != nil {
+			return nil, err
+		}
+
+		drm.Host = host.Host
+		return &drm, nil
 	}
 
 	req, err := http.NewRequest("GET", c.URL, nil)

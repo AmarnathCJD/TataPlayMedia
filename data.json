@@ -3484,5 +3484,21 @@
     "link": "https://rogstream.fun//hls/tata/play.php?id=1023",
     "image": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-73014-l8gzok74-v2/imageContent-73014-l8gzok74-m4.png",
     "genre": "Knowledge"
+  },
+  {
+    "name": "HBO",
+    "link": "https://boomtv.co.in/ayna/player.php?c=hbo",
+    "header": "https://mhdtvworld.me/",
+    "mhd": true,
+    "image": "https://mhdtvworld.me/wp-content/uploads/2023/06/HBO.webp",
+    "genre": "Movies"
+  },
+  {
+    "name": "Star Sports 1 HD",
+    "link": "https://faketv.co.in/criclife/starsp1hindi.php",
+    "header": "https://mhdtvworld.me/",
+    "mhd": true,
+    "image": "https://mhdtvworld.me/wp-content/uploads/2020/02/star1hd.webp",
+    "genre": "Sports"
   }
 ]
