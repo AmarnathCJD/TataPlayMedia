@@ -25,7 +25,7 @@ func DRMHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	drm, err := channel.GetDRMWithoutEnc()
+	drm, err := channel.GetDRM()
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return

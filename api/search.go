@@ -238,6 +238,54 @@ func (c *Channel) GetDRM() (*DRM, error) {
 		return nil, fmt.Errorf("URL is empty")
 	}
 
+	if c.Mhd {
+		req, err := http.NewRequest("GET", c.URL, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:84.0) Gecko/20100101 Firefox/84.0")
+		req.Header.Set("Referer", c.Header)
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		mpdRe := regexp.MustCompile(`source:\s*'([^']+)`)
+		clearkeyRe := regexp.MustCompile(`'([0-9a-f]+)':\s*'([0-9a-f]+)'`)
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		mpd := mpdRe.FindSubmatch(body)
+		if len(mpd) < 2 {
+			return nil, fmt.Errorf("mpd not found")
+		}
+
+		drm.MPD = strings.Replace(string(mpd[1]), "\\", "", -1)
+		clearKey := clearkeyRe.FindSubmatch(body)
+		if len(clearKey) < 3 {
+			return &drm, nil
+		}
+
+		drm.KeyID = string(clearKey[1])
+		drm.Key = string(clearKey[2])
+		drm.Name = c.Name
+		drm.Image = c.Image
+
+		host, err := url.Parse(drm.MPD)
+		if err != nil {
+			return nil, err
+		}
+
+		drm.Host = host.Host
+		return &drm, nil
+	}
+
 	req, err := http.NewRequest("GET", c.URL, nil)
 	if err != nil {
 		return nil, err
@@ -263,13 +311,16 @@ func (c *Channel) GetDRM() (*DRM, error) {
 	if jsq, err := compileJS(bdy); err != nil {
 		return nil, err
 	} else {
-		drm.MPD = extractValue(jsq, `file: "`, `"`)
-		drm.KeyID = extractValue(jsq, `keyId":"`, `"`)
-		drm.Key = extractValue(jsq, `key":"`, `"`)
-
-		urlHost, _ := url.Parse(drm.MPD)
-		drm.Host = urlHost.Host
+		drm.MPD = extractValue(string(jsq), `file: "`, `"`)
+		drm.KeyID = extractValue(string(jsq), `"keyId":"`, `"`)
+		drm.Key = extractValue(string(jsq), `key":"`, `"`)
 		drm.Curr = prg
+		host, err := url.Parse(drm.MPD)
+		if err != nil {
+			return nil, err
+		}
+
+		drm.Host = host.Host
 		drm.Name = c.Name
 		drm.Image = c.Image
 	}
