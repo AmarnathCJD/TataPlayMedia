@@ -185,6 +185,8 @@ func (c *Channel) GetDRMWithoutEnc() (*DRM, error) {
 
 		drm.KeyID = string(clearKey[1])
 		drm.Key = string(clearKey[2])
+		drm.Name = c.Name
+		drm.Image = c.Image
 
 		host, err := url.Parse(drm.MPD)
 		if err != nil {
