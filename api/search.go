@@ -137,6 +137,9 @@ func (t *TV) GetChannel(id string) (*Channel, error) {
 }
 
 func (c *Channel) GetID() string {
+	if len(strings.Split(c.URL, "id=")) < 2 {
+		return c.Id
+	}
 	return strings.Split(c.URL, "id=")[1]
 }
 
@@ -174,7 +177,7 @@ func (c *Channel) GetDRMWithoutEnc() (*DRM, error) {
 			return nil, fmt.Errorf("mpd not found")
 		}
 
-		drm.MPD = string(mpd[1])
+		drm.MPD = strings.Replace(string(mpd[1]), "\\", "", -1)
 		clearKey := clearkeyRe.FindSubmatch(body)
 		if len(clearKey) < 3 {
 			return &drm, nil

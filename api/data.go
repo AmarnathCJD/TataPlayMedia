@@ -3503,7 +3503,8 @@ var ChannelList = `
     "header": "https://mhdtvworld.me/",
     "mhd": true,
     "image": "https://mhdtvworld.me/wp-content/uploads/2023/06/HBO.webp",
-    "genre": "Movies"
+    "genre": "Movies",
+    "id": "962"
   },
   {
     "name": "Star Sports 1 HD",
@@ -3511,7 +3512,8 @@ var ChannelList = `
     "header": "https://mhdtvworld.me/",
     "mhd": true,
     "image": "https://mhdtvworld.me/wp-content/uploads/2020/02/star1hd.webp",
-    "genre": "Sports"
+    "genre": "Sports",
+    "id": "998"
   }
 ]
 `

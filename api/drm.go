@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -17,6 +18,8 @@ func DRMHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	channel, err := MainTV.GetChannel(id)
+
+	fmt.Println(channel)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
